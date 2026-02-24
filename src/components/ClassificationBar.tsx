@@ -18,29 +18,27 @@ export const ClassificationBar: React.FC<ClassificationBarProps> = ({ onSelect, 
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => onSelect(type)}
-            className={`flex-shrink-0 w-24 flex flex-col items-center p-4 rounded-[2rem] transition-all snap-center border-b-4 ${
+            className={`flex-shrink-0 w-28 flex flex-col items-center p-4 rounded-[2.5rem] transition-all snap-center ${
               selectedId === type.id 
-                ? type.id === 'RAINBOW' 
-                  ? 'bg-gradient-to-b from-yellow-50 to-yellow-100 border-yellow-400 shadow-lg shadow-yellow-100'
-                  : 'bg-gradient-to-b from-blue-50 to-blue-100 border-blue-400 shadow-md' 
-                : 'bg-white border-slate-100 hover:bg-slate-50'
+                ? 'bg-white shadow-[0_10px_30px_rgba(0,0,0,0.08)] ring-2 ring-blue-400/20' 
+                : 'bg-white/60 hover:bg-white shadow-sm'
             }`}
           >
             <motion.div 
               animate={selectedId === type.id ? { 
-                scale: [1, 1.25, 1], 
-                rotate: [0, 15, -15, 0],
-                y: [0, -5, 0]
+                scale: [1, 1.2, 1], 
+                rotate: [0, 10, -10, 0],
+                y: [0, -4, 0]
               } : {}}
               transition={{ duration: 0.5 }}
-              className="text-4xl mb-2 filter drop-shadow-sm"
+              className="text-4xl mb-3 filter drop-shadow-sm"
             >
               {type.icon}
             </motion.div>
-            <span className="text-[9px] uppercase font-black text-slate-400 tracking-widest mb-0.5">
+            <span className="text-[9px] uppercase font-black text-slate-400 tracking-widest mb-1">
               {type.subLabel}
             </span>
-            <span className="text-[11px] font-black text-slate-700 truncate w-full text-center">
+            <span className="text-[12px] font-black text-slate-800 truncate w-full text-center">
               {type.label}
             </span>
           </motion.button>

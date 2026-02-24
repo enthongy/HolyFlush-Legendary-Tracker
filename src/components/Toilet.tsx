@@ -146,32 +146,41 @@ export const Toilet: React.FC<ToiletProps> = ({
         }}
       >
         {/* Tank - 3D Box */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-52 h-36 preserve-3d">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-52 h-40 preserve-3d">
           {/* Front */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border-b-4 border-slate-200 shadow-lg z-20 flex flex-col items-center pt-4">
-             <div className="w-16 h-1.5 bg-slate-200 rounded-full opacity-40" />
+          <div className="absolute inset-0 bg-gradient-to-br from-white to-slate-50 rounded-2xl border-b-4 border-slate-200 shadow-lg z-20 flex flex-col items-center pt-4">
+             <div className="w-16 h-1.5 bg-slate-100 rounded-full opacity-40" />
           </div>
           {/* Top */}
-          <div className="absolute -top-1.5 left-0 w-full h-6 bg-slate-50 rounded-t-3xl border-b border-slate-200 transform -rotateX-90 origin-bottom" />
-          {/* Side Right */}
-          <div className="absolute top-0 -right-1.5 w-3 h-full bg-slate-200 rounded-r-2xl transform rotateY-90 origin-left" />
+          <div className="absolute -top-2 left-0 w-full h-8 bg-white rounded-t-3xl border-b border-slate-200 transform -rotateX-90 origin-bottom flex items-center justify-center">
+            {/* Top Button */}
+            <div className="w-12 h-12 bg-slate-100 rounded-full border-2 border-slate-200 shadow-inner flex items-center justify-center">
+              <div className="w-8 h-8 bg-white rounded-full border border-slate-200 shadow-sm" />
+            </div>
+          </div>
+          {/* Side Left */}
+          <div className="absolute top-0 -left-1.5 w-3 h-full bg-slate-100 rounded-l-2xl transform rotateY-90 origin-right" />
           
-          {/* Handle */}
-          <motion.button
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onTouchStart={handleMouseDown}
-            onTouchEnd={handleMouseUp}
-            disabled={isFlushing || !selectedPoo}
-            whileTap={{ rotate: 60, scale: 0.8 }}
-            className={`absolute top-8 right-4 w-10 h-4 rounded-full border-2 shadow-md cursor-pointer transition-all duration-300 z-30 ${
-              (isLongPressing || (isFlushing && wasHolyFlush)) 
-                ? 'bg-gradient-to-br from-yellow-300 to-yellow-500 border-yellow-600 shadow-[0_0_20px_rgba(234,179,8,0.6)]' 
-                : 'bg-gradient-to-br from-slate-200 to-slate-300 border-slate-400'
-            } ${isFlushing || !selectedPoo ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <div className="absolute -right-0.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-slate-500 rounded-full border border-slate-300" />
-          </motion.button>
+          {/* Handle (Moved to Left) */}
+          <div className="absolute top-12 -left-10 w-12 h-12 preserve-3d z-30">
+            <motion.button
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onTouchStart={handleMouseDown}
+              onTouchEnd={handleMouseUp}
+              disabled={isFlushing || !selectedPoo}
+              whileTap={{ rotate: 45, scale: 0.9 }}
+              className={`w-full h-full rounded-full border-4 shadow-lg cursor-pointer transition-all duration-300 flex items-center justify-center ${
+                (isLongPressing || (isFlushing && wasHolyFlush)) 
+                  ? 'bg-gradient-to-br from-yellow-300 to-yellow-500 border-yellow-600 shadow-[0_0_20px_rgba(234,179,8,0.6)]' 
+                  : 'bg-gradient-to-br from-slate-200 to-slate-300 border-slate-400'
+              } ${isFlushing || !selectedPoo ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <div className="w-5 h-5 bg-slate-500 rounded-full border border-slate-300 shadow-inner" />
+            </motion.button>
+            {/* Handle Stem */}
+            <div className="absolute top-1/2 left-[80%] -translate-y-1/2 w-6 h-3 bg-gradient-to-r from-slate-300 to-slate-400 rounded-full -z-10 shadow-sm" />
+          </div>
           
           {/* Holy Glow */}
           <AnimatePresence>
@@ -191,17 +200,17 @@ export const Toilet: React.FC<ToiletProps> = ({
         </div>
 
         {/* Bowl Base - 3D Rounded Shape */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-64 h-56 preserve-3d">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-64 h-60 preserve-3d">
           {/* Main Bowl Body */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-50 to-slate-200 rounded-[45%_45%_50%_50%] shadow-2xl border-b-8 border-slate-300" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white to-slate-100 rounded-[45%_45%_50%_50%] shadow-2xl border-b-8 border-slate-200" />
           
           {/* Rim - Refined for no lid look */}
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-[105%] h-14 bg-slate-50 rounded-full border-4 border-slate-100 shadow-md z-10 flex items-center justify-center overflow-hidden">
-            <div className="w-[95%] h-[90%] bg-gradient-to-b from-slate-100 to-white rounded-full border border-slate-200/50 shadow-inner" />
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-[105%] h-18 bg-white rounded-full border-4 border-slate-50 shadow-md z-10 flex items-center justify-center overflow-hidden">
+            <div className="w-[95%] h-[92%] bg-gradient-to-b from-slate-50 to-white rounded-full border border-slate-100 shadow-inner" />
           </div>
 
           {/* Interior Basin */}
-          <div className="absolute top-2 left-4 right-4 bottom-6 bg-slate-50 rounded-full border-2 border-slate-200/50 overflow-hidden z-20 shadow-inner">
+          <div className="absolute top-0 left-4 right-4 bottom-8 bg-white rounded-full border-2 border-slate-100 overflow-hidden z-20 shadow-inner">
             {/* Water Basin */}
             <motion.div 
               className="absolute inset-0 flex items-center justify-center"
@@ -210,7 +219,7 @@ export const Toilet: React.FC<ToiletProps> = ({
                   ? 'rgba(254, 249, 195, 0.95)' 
                   : isFlushing 
                     ? 'rgba(186, 230, 253, 0.9)' 
-                    : 'rgba(224, 242, 254, 0.7)'
+                    : 'rgba(186, 242, 255, 0.7)'
               }}
               transition={{ duration: 0.4 }}
             >

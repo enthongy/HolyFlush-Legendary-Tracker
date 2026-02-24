@@ -4,7 +4,7 @@ export const POO_TYPES: PooTypeConfig[] = [
   {
     id: PooType.ROCK_SOLID,
     label: 'Rock Solid',
-    subLabel: 'Type 1',
+    subLabel: 'Type 2',
     icon: '🪨',
     color: 'bg-stone-600',
     description: 'Constipation',
@@ -36,8 +36,8 @@ export const POO_TYPES: PooTypeConfig[] = [
   {
     id: PooType.UNKNOWN,
     label: 'Unknown',
-    subLabel: '?',
-    icon: '❓',
+    subLabel: 'Type ?',
+    icon: '🔮',
     color: 'bg-slate-400',
     description: "Didn't look",
   },
