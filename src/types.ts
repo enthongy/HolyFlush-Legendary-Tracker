@@ -7,10 +7,19 @@ export enum PooType {
   RAINBOW = 'RAINBOW',
 }
 
+export enum FlushRank {
+  NORMAL = 'NORMAL',
+  BLESSED = 'BLESSED',
+  HOLY = 'HOLY',
+  DIVINE = 'DIVINE',
+  LEGENDARY = 'LEGENDARY',
+}
+
 export interface PooLogEntry {
   id: string;
   timestamp: number;
   type: PooType;
+  rank?: FlushRank;
 }
 
 export interface PooTypeConfig {

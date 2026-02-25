@@ -57,4 +57,5 @@ export const SOUNDS = {
   RAINBOW: 'https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3',
   HOLY: 'https://image2url.com/r2/default/audio/1771997563766-fbda3064-caf8-45c0-aa65-4bad81edb495.mp3', // More intense heavenly shimmer
   CLICK: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', // Subtle click for the handle
+  RANK_UP: 'https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3', // Chime for rank progression
 };

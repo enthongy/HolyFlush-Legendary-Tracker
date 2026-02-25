@@ -13,6 +13,14 @@ interface CalendarProps {
 export const Calendar: React.FC<CalendarProps> = ({ isOpen, onClose, history }) => {
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(new Date());
+  const activityListRef = React.useRef<HTMLDivElement>(null);
+
+  // Scroll to activity list when a date is selected
+  React.useEffect(() => {
+    if (selectedDate && activityListRef.current) {
+      activityListRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [selectedDate]);
 
   const daysInMonth = new Date(
     currentDate.getFullYear(),
@@ -109,8 +117,8 @@ export const Calendar: React.FC<CalendarProps> = ({ isOpen, onClose, history }) 
                 </div>
 
                 <div className="grid grid-cols-7 gap-1 mb-2">
-                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-                    <div key={day} className="text-center text-[10px] font-black text-slate-300 uppercase py-2">
+                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                    <div key={`${day}-${i}`} className="text-center text-[10px] font-black text-slate-300 uppercase py-2">
                       {day}
                     </div>
                   ))}
@@ -138,16 +146,16 @@ export const Calendar: React.FC<CalendarProps> = ({ isOpen, onClose, history }) 
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         animate={isSelected ? { 
-                          scale: [1, 1.05, 1],
+                          scale: [1, 1.08, 1],
                           boxShadow: [
-                            "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
-                            "0 10px 15px -3px rgb(59 130 246 / 0.3), 0 4px 6px -4px rgb(59 130 246 / 0.3)",
-                            "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)"
+                            "0 10px 15px -3px rgba(59, 130, 246, 0.2), 0 4px 6px -2px rgba(59, 130, 246, 0.1)",
+                            "0 25px 50px -12px rgba(59, 130, 246, 0.5), 0 0 20px 5px rgba(59, 130, 246, 0.3)",
+                            "0 10px 15px -3px rgba(59, 130, 246, 0.2), 0 4px 6px -2px rgba(59, 130, 246, 0.1)"
                           ]
-                        } : { scale: 1, boxShadow: "none" }}
+                        } : { scale: 1, boxShadow: "0 0 0 0 rgba(0,0,0,0)" }}
                         transition={isSelected ? { 
-                          scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-                          boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                          scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
+                          boxShadow: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
                         } : {}}
                         className={`aspect-square relative flex flex-col items-center justify-center rounded-2xl border-2 transition-all ${
                           isSelected 
@@ -186,7 +194,7 @@ export const Calendar: React.FC<CalendarProps> = ({ isOpen, onClose, history }) 
               </div>
 
               {/* Activity List Section */}
-              <div className="bg-slate-50 p-6 border-t border-slate-100 min-h-[300px]">
+              <div ref={activityListRef} className="bg-slate-50 p-6 border-t border-slate-100 min-h-[300px]">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                     {selectedDate 
@@ -224,7 +232,14 @@ export const Calendar: React.FC<CalendarProps> = ({ isOpen, onClose, history }) 
                           <div className="flex items-center gap-4">
                             <span className="text-3xl filter drop-shadow-sm">{type?.icon}</span>
                             <div>
-                              <div className="text-sm font-black text-slate-700">{type?.label}</div>
+                              <div className="flex items-center gap-2">
+                                <div className="text-sm font-black text-slate-700">{type?.label}</div>
+                                {entry.rank && entry.rank !== 'NORMAL' && (
+                                  <span className="text-[8px] font-black bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded-full border border-blue-100 uppercase tracking-tighter">
+                                    {entry.rank}
+                                  </span>
+                                )}
+                              </div>
                               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                                 {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 {!selectedDate && ` • ${new Date(entry.timestamp).toLocaleDateString()}`}

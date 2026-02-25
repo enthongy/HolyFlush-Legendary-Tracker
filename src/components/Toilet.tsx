@@ -1,18 +1,20 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { PooTypeConfig, PooType } from '../types';
+import { PooTypeConfig, PooType, FlushRank } from '../types';
 import { SOUNDS } from '../constants';
 
 interface ToiletProps {
   selectedPoo: PooTypeConfig | null;
   isFlushing: boolean;
+  flushRank: FlushRank;
   onFlushComplete: () => void;
-  onHandleClick: (isHoly: boolean) => void;
+  onHandleClick: (rank: FlushRank) => void;
 }
 
 export const Toilet: React.FC<ToiletProps> = ({
   selectedPoo,
   isFlushing,
+  flushRank,
   onFlushComplete,
   onHandleClick,
 }) => {
@@ -21,12 +23,69 @@ export const Toilet: React.FC<ToiletProps> = ({
   const holyAudio = useRef<HTMLAudioElement | null>(null);
   const rainbowAudio = useRef<HTMLAudioElement | null>(null);
   const clickAudio = useRef<HTMLAudioElement | null>(null);
+  const rankUpAudio = useRef<HTMLAudioElement | null>(null);
   
   const [isLongPressing, setIsLongPressing] = useState(false);
-  const [wasHolyFlush, setWasHolyFlush] = useState(false);
+  const [currentRank, setCurrentRank] = useState<FlushRank>(FlushRank.NORMAL);
+  const [activeFlushRank, setActiveFlushRank] = useState<FlushRank>(FlushRank.NORMAL);
   const [isImpacted, setIsImpacted] = useState(false);
   const [rippleKey, setRippleKey] = useState(0);
+
+  const getRankStyles = (rank: FlushRank) => {
+    switch (rank) {
+      case FlushRank.LEGENDARY:
+        return {
+          handle: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 border-pink-600 shadow-[0_0_30px_rgba(236,72,153,0.6)]',
+          vortex: 'border-pink-300/60 border-t-white shadow-[0_0_50px_rgba(236,72,153,0.5)]',
+          particle: 'bg-gradient-to-br from-pink-200 to-purple-500 shadow-[0_0_15px_rgba(236,72,153,0.8)]',
+          basin: 'rgba(253, 242, 248, 0.95)',
+          glow: 'bg-pink-200/50',
+          intensity: 1.5
+        };
+      case FlushRank.DIVINE:
+        return {
+          handle: 'bg-gradient-to-br from-yellow-400 to-orange-500 border-orange-600 shadow-[0_0_25px_rgba(245,158,11,0.6)]',
+          vortex: 'border-yellow-300/70 border-t-white shadow-[0_0_45px_rgba(245,158,11,0.5)]',
+          particle: 'bg-gradient-to-br from-yellow-200 to-orange-500 shadow-[0_0_12px_rgba(245,158,11,0.8)]',
+          basin: 'rgba(255, 251, 235, 0.95)',
+          glow: 'bg-orange-200/50',
+          intensity: 1.2
+        };
+      case FlushRank.HOLY:
+        return {
+          handle: 'bg-gradient-to-br from-yellow-300 to-yellow-500 border-yellow-600 shadow-[0_0_20px_rgba(234,179,8,0.6)]',
+          vortex: 'border-yellow-300/60 border-t-white shadow-[0_0_40px_rgba(234,179,8,0.4)]',
+          particle: 'bg-gradient-to-br from-yellow-200 to-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.8)]',
+          basin: 'rgba(254, 249, 195, 0.95)',
+          glow: 'bg-yellow-200/50',
+          intensity: 1.0
+        };
+      case FlushRank.BLESSED:
+        return {
+          handle: 'bg-gradient-to-br from-blue-300 to-blue-500 border-blue-600 shadow-[0_0_15px_rgba(59,130,246,0.4)]',
+          vortex: 'border-blue-300/50 border-t-white shadow-[0_0_30px_rgba(59,130,246,0.3)]',
+          particle: 'bg-gradient-to-br from-blue-100 to-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.6)]',
+          basin: 'rgba(239, 246, 255, 0.95)',
+          glow: 'bg-blue-200/50',
+          intensity: 0.8
+        };
+      default:
+        return {
+          handle: 'bg-gradient-to-br from-slate-200 to-slate-300 border-slate-400',
+          vortex: 'border-blue-200/40 border-t-blue-400/60',
+          particle: 'bg-white/80 shadow-sm',
+          basin: 'rgba(186, 230, 253, 0.9)',
+          glow: 'bg-transparent',
+          intensity: 0.6
+        };
+    }
+  };
+
+  const targetRank = isFlushing ? activeFlushRank : currentRank;
+  const rankStyles = getRankStyles(targetRank);
+  const isEnhanced = targetRank !== FlushRank.NORMAL;
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(0);
   const hasTriggeredRef = useRef(false);
 
   useEffect(() => {
@@ -35,8 +94,9 @@ export const Toilet: React.FC<ToiletProps> = ({
     holyAudio.current = new Audio(SOUNDS.HOLY);
     rainbowAudio.current = new Audio(SOUNDS.RAINBOW);
     clickAudio.current = new Audio(SOUNDS.CLICK);
+    rankUpAudio.current = new Audio(SOUNDS.RANK_UP);
     
-    [splashAudio, flushAudio, holyAudio, rainbowAudio, clickAudio].forEach(ref => {
+    [splashAudio, flushAudio, holyAudio, rainbowAudio, clickAudio, rankUpAudio].forEach(ref => {
       if (ref.current) {
         ref.current.load();
         ref.current.volume = 0.7;
@@ -60,6 +120,12 @@ export const Toilet: React.FC<ToiletProps> = ({
         playSound(splashAudio, 0.8);
         setIsImpacted(true);
         setRippleKey(prev => prev + 1);
+        
+        // Subtle haptic feedback on impact
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          navigator.vibrate(15);
+        }
+        
         setTimeout(() => setIsImpacted(false), 150);
       }, 0);
       
@@ -74,7 +140,8 @@ export const Toilet: React.FC<ToiletProps> = ({
   // Trigger flush sound and handle completion timing
   useEffect(() => {
     if (isFlushing) {
-      const mainAudio = wasHolyFlush ? holyAudio.current : flushAudio.current;
+      const isEnhanced = activeFlushRank !== FlushRank.NORMAL;
+      const mainAudio = isEnhanced ? holyAudio.current : flushAudio.current;
       
       if (mainAudio) {
         const handleEnded = () => {
@@ -83,7 +150,7 @@ export const Toilet: React.FC<ToiletProps> = ({
         mainAudio.addEventListener('ended', handleEnded);
         
         // Play sounds immediately
-        if (wasHolyFlush) {
+        if (isEnhanced) {
           playSound(holyAudio, 1.0);
         }
         playSound(flushAudio, 0.9);
@@ -102,12 +169,12 @@ export const Toilet: React.FC<ToiletProps> = ({
         };
       } else {
         // Fallback if audio not available
-        const duration = wasHolyFlush ? 12000 : 7000;
+        const duration = isEnhanced ? 12000 : 7000;
         const completeTimer = setTimeout(onFlushComplete, duration);
         return () => clearTimeout(completeTimer);
       }
     }
-  }, [isFlushing, wasHolyFlush, playSound, onFlushComplete]);
+  }, [isFlushing, activeFlushRank, playSound, onFlushComplete]);
 
   const handleMouseDown = () => {
     if (isFlushing || !selectedPoo) return;
@@ -119,18 +186,41 @@ export const Toilet: React.FC<ToiletProps> = ({
     }
     
     hasTriggeredRef.current = false;
+    startTimeRef.current = Date.now();
+    setCurrentRank(FlushRank.NORMAL);
+    let lastEmittedRank = FlushRank.NORMAL;
     
-    longPressTimer.current = setTimeout(() => {
-      setIsLongPressing(true);
-      setWasHolyFlush(true);
-      onHandleClick(true);
-      hasTriggeredRef.current = true;
+    // Start a continuous check for rank
+    const checkRank = () => {
+      const elapsed = Date.now() - startTimeRef.current;
       
-      // Stronger haptic feedback when holy flush is triggered
-      if (typeof navigator !== 'undefined' && navigator.vibrate) {
-        navigator.vibrate([30, 50, 30]);
+      let newRank = FlushRank.NORMAL;
+      if (elapsed >= 4000) newRank = FlushRank.LEGENDARY;
+      else if (elapsed >= 3000) newRank = FlushRank.DIVINE;
+      else if (elapsed >= 2000) newRank = FlushRank.HOLY;
+      else if (elapsed >= 1000) newRank = FlushRank.BLESSED;
+      
+      if (newRank !== lastEmittedRank) {
+        lastEmittedRank = newRank;
+        setCurrentRank(newRank);
+        
+        if (newRank !== FlushRank.NORMAL) {
+          setIsLongPressing(true);
+          playSound(rankUpAudio, 0.4);
+          
+          // Vibrate on each rank up
+          if (typeof navigator !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate(20);
+          }
+        }
       }
-    }, 1500);
+      
+      if (!hasTriggeredRef.current) {
+        longPressTimer.current = setTimeout(checkRank, 100);
+      }
+    };
+    
+    checkRank();
   };
 
   const handleMouseUp = () => {
@@ -139,9 +229,17 @@ export const Toilet: React.FC<ToiletProps> = ({
     }
     
     if (!isFlushing && selectedPoo && !hasTriggeredRef.current) {
-      // This was a short press
-      setWasHolyFlush(false);
-      onHandleClick(false);
+      hasTriggeredRef.current = true;
+      const elapsed = Date.now() - startTimeRef.current;
+      
+      let finalRank = FlushRank.NORMAL;
+      if (elapsed >= 4000) finalRank = FlushRank.LEGENDARY;
+      else if (elapsed >= 3000) finalRank = FlushRank.DIVINE;
+      else if (elapsed >= 2000) finalRank = FlushRank.HOLY;
+      else if (elapsed >= 1000) finalRank = FlushRank.BLESSED;
+
+      setActiveFlushRank(finalRank);
+      onHandleClick(finalRank);
     }
     
     setIsLongPressing(false);
@@ -150,7 +248,7 @@ export const Toilet: React.FC<ToiletProps> = ({
   // Reset all local interactive states when flush is done
   useEffect(() => {
     if (!isFlushing) {
-      setWasHolyFlush(false);
+      setActiveFlushRank(FlushRank.NORMAL);
       setIsLongPressing(false);
       if (longPressTimer.current) clearTimeout(longPressTimer.current);
     }
@@ -163,12 +261,12 @@ export const Toilet: React.FC<ToiletProps> = ({
         className="relative w-full h-full preserve-3d"
         animate={{ 
           rotateX: isFlushing ? [15, 25, 15] : (isImpacted ? 17 : 15),
-          rotateY: (isLongPressing || (isFlushing && wasHolyFlush)) ? [ -12, 0, 12, -12] : -12,
-          scale: isFlushing ? (wasHolyFlush ? [1, 1.1, 1] : [1, 0.98, 1]) : (isImpacted ? 0.99 : 1),
-          y: (isLongPressing || (isFlushing && wasHolyFlush)) ? [0, -15, 0] : 0
+          rotateY: (isLongPressing || (isFlushing && isEnhanced)) ? [ -12, 0, 12, -12] : -12,
+          scale: isFlushing ? (isEnhanced ? [1, 1.1, 1] : [1, 0.98, 1]) : (isImpacted ? 0.99 : 1),
+          y: (isLongPressing || (isFlushing && isEnhanced)) ? [0, -15, 0] : 0
         }}
-        transition={isFlushing ? { 
-          duration: isLongPressing ? 0.2 : 0.6, 
+        transition={isFlushing || isLongPressing ? { 
+          duration: isLongPressing ? 0.4 : 0.6, 
           repeat: Infinity,
           repeatType: "reverse",
           ease: "easeInOut"
@@ -205,12 +303,26 @@ export const Toilet: React.FC<ToiletProps> = ({
               disabled={isFlushing || !selectedPoo}
               whileTap={{ rotate: 45, scale: 0.9 }}
               className={`w-full h-full rounded-full border-4 shadow-lg cursor-pointer transition-all duration-300 flex items-center justify-center ${
-                (isLongPressing || (isFlushing && wasHolyFlush)) 
-                  ? 'bg-gradient-to-br from-yellow-300 to-yellow-500 border-yellow-600 shadow-[0_0_20px_rgba(234,179,8,0.6)]' 
+                (isLongPressing || (isFlushing && isEnhanced)) 
+                  ? rankStyles.handle
                   : 'bg-gradient-to-br from-slate-200 to-slate-300 border-slate-400'
               } ${isFlushing || !selectedPoo ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <div className="w-5 h-5 bg-slate-500 rounded-full border border-slate-300 shadow-inner" />
+              
+              {/* Rank Indicator */}
+              <AnimatePresence>
+                {isLongPressing && !isFlushing && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.5 }}
+                    animate={{ opacity: 1, y: -50, scale: 1.2 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    className="absolute whitespace-nowrap bg-slate-900 text-white px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase shadow-xl border border-white/20"
+                  >
+                    {currentRank}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.button>
             {/* Handle Stem */}
             <div className="absolute top-1/2 left-[80%] -translate-y-1/2 w-6 h-3 bg-gradient-to-r from-slate-300 to-slate-400 rounded-full -z-10 shadow-sm" />
@@ -218,7 +330,7 @@ export const Toilet: React.FC<ToiletProps> = ({
           
           {/* Holy Glow */}
           <AnimatePresence>
-            {(isLongPressing || (isFlushing && wasHolyFlush)) && (
+            {(isLongPressing || (isFlushing && isEnhanced)) && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ 
@@ -227,7 +339,7 @@ export const Toilet: React.FC<ToiletProps> = ({
                 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1.2, repeat: Infinity }}
-                className="absolute inset-0 bg-yellow-200/50 blur-3xl rounded-full -z-10"
+                className={`absolute inset-0 blur-3xl rounded-full -z-10 ${rankStyles.glow}`}
               />
             )}
           </AnimatePresence>
@@ -249,8 +361,8 @@ export const Toilet: React.FC<ToiletProps> = ({
             <motion.div 
               className="absolute inset-0 flex items-center justify-center"
               animate={{
-                backgroundColor: (isLongPressing || (isFlushing && wasHolyFlush))
-                  ? 'rgba(254, 249, 195, 0.95)' 
+                backgroundColor: (isLongPressing || (isFlushing && isEnhanced))
+                  ? rankStyles.basin 
                   : isFlushing 
                     ? 'rgba(186, 230, 253, 0.9)' 
                     : 'rgba(186, 242, 255, 0.7)'
@@ -337,22 +449,22 @@ export const Toilet: React.FC<ToiletProps> = ({
                         initial={{ opacity: 0, scale: 0, rotate: 0 }}
                         animate={{ 
                           opacity: 0.8, 
-                          scale: wasHolyFlush ? 3.5 + i * 0.5 : 2.2 + i * 0.3, 
+                          scale: isEnhanced ? (2.5 + rankStyles.intensity * 1.0) + i * 0.5 : 2.2 + i * 0.3, 
                           rotate: 360 * (i % 2 === 0 ? 1 : -1)
                         }}
                         exit={{ opacity: 0, scale: 0, transition: { duration: 0.8 } }}
                         transition={{ 
                           opacity: { duration: 0.5 },
-                          scale: { duration: 0.8, ease: "backOut" },
+                          scale: { duration: 1.5, ease: "easeOut" },
                           rotate: { 
-                            duration: wasHolyFlush ? 1.5 : 2.5, 
+                            duration: isEnhanced ? 1.2 / rankStyles.intensity : 2.0, 
                             repeat: Infinity, 
                             ease: "linear" 
                           }
                         }}
                         className={`absolute w-40 h-40 border-[10px] rounded-full ${
-                          wasHolyFlush 
-                            ? 'border-yellow-300/60 border-t-white shadow-[0_0_40px_rgba(234,179,8,0.4)]' 
+                          isEnhanced 
+                            ? rankStyles.vortex
                             : 'border-blue-200/40 border-t-blue-400/60'
                         }`}
                         style={{ borderStyle: i % 2 === 0 ? 'solid' : 'dashed' }}
@@ -360,7 +472,7 @@ export const Toilet: React.FC<ToiletProps> = ({
                     ))}
 
                     {/* Swirling Particles (Bubbles/Foam/Gold) */}
-                    {[...Array(wasHolyFlush ? 40 : 20)].map((_, i) => (
+                    {[...Array(isEnhanced ? Math.floor(20 + Math.pow(rankStyles.intensity, 2) * 50) : 20)].map((_, i) => (
                       <motion.div
                         key={`particle-${i}`}
                         initial={{ opacity: 0, scale: 0, rotate: Math.random() * 360 }}
@@ -374,7 +486,7 @@ export const Toilet: React.FC<ToiletProps> = ({
                           opacity: { duration: 0.3 },
                           scale: { duration: 0.5 },
                           rotate: { 
-                            duration: (wasHolyFlush ? 2 : 3) + Math.random() * 1, 
+                            duration: ((isEnhanced ? 2 : 3) / rankStyles.intensity) + Math.random() * 1, 
                             repeat: Infinity, 
                             ease: "linear" 
                           },
@@ -384,16 +496,16 @@ export const Toilet: React.FC<ToiletProps> = ({
                       >
                         <div 
                           className={`absolute rounded-full ${
-                            wasHolyFlush 
-                              ? 'bg-gradient-to-br from-yellow-200 to-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.8)]' 
+                            isEnhanced 
+                              ? rankStyles.particle
                               : 'bg-white/80 shadow-sm'
                           }`}
                           style={{
-                            width: wasHolyFlush ? Math.random() * 8 + 3 : Math.random() * 5 + 2,
-                            height: wasHolyFlush ? Math.random() * 8 + 3 : Math.random() * 5 + 2,
+                            width: isEnhanced ? Math.random() * 8 + 3 : Math.random() * 5 + 2,
+                            height: isEnhanced ? Math.random() * 8 + 3 : Math.random() * 5 + 2,
                             left: `${50 + (Math.random() * 35 + 5)}%`,
                             top: `${50 + (Math.random() * 10 - 5)}%`,
-                            filter: wasHolyFlush ? 'none' : 'blur(0.5px)'
+                            filter: isEnhanced ? 'none' : 'blur(0.5px)'
                           }}
                         />
                       </motion.div>
@@ -407,7 +519,7 @@ export const Toilet: React.FC<ToiletProps> = ({
                       }}
                       transition={{ duration: 0.5, repeat: Infinity }}
                       className={`absolute w-12 h-12 rounded-full blur-xl ${
-                        wasHolyFlush ? 'bg-yellow-400' : 'bg-blue-400'
+                        isEnhanced ? (targetRank === FlushRank.LEGENDARY ? 'bg-pink-400' : 'bg-yellow-400') : 'bg-blue-400'
                       }`}
                     />
                   </div>
@@ -421,11 +533,11 @@ export const Toilet: React.FC<ToiletProps> = ({
                     key={selectedPoo.id}
                     initial={{ y: -400, opacity: 0, scale: 0.1, rotate: -60 }}
                     animate={isFlushing ? {
-                      rotate: wasHolyFlush ? 8640 : 5040,
+                      rotate: isEnhanced ? 14400 * rankStyles.intensity : 7200,
                       scale: 0,
                       opacity: 0,
                       y: 150,
-                      transition: { duration: wasHolyFlush ? 2.5 : 1.8, ease: "anticipate" }
+                      transition: { duration: isEnhanced ? 6.5 : 4.0, ease: "anticipate" }
                     } : {
                       y: 0,
                       opacity: 1,
