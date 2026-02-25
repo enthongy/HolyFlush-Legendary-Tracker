@@ -2,6 +2,14 @@ import { PooType, PooTypeConfig } from './types';
 
 export const POO_TYPES: PooTypeConfig[] = [
   {
+    id: PooType.IDEAL,
+    label: 'Ideal',
+    subLabel: 'Type 1',
+    icon: '🐍',
+    color: 'bg-emerald-600',
+    description: 'The gold standard',
+  },
+  {
     id: PooType.ROCK_SOLID,
     label: 'Rock Solid',
     subLabel: 'Type 2',
@@ -18,17 +26,9 @@ export const POO_TYPES: PooTypeConfig[] = [
     description: 'Low hydration',
   },
   {
-    id: PooType.IDEAL,
-    label: 'Ideal',
-    subLabel: 'Type 4',
-    icon: '🐍',
-    color: 'bg-emerald-600',
-    description: 'The gold standard',
-  },
-  {
     id: PooType.WATERY,
     label: 'Watery',
-    subLabel: 'Type 7',
+    subLabel: 'Type 4',
     icon: '💧',
     color: 'bg-blue-500',
     description: 'Diarrhea',
@@ -52,9 +52,9 @@ export const POO_TYPES: PooTypeConfig[] = [
 ];
 
 export const SOUNDS = {
-  SPLASH: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
-  FLUSH: 'https://assets.mixkit.co/active_storage/sfx/1350/1350-preview.mp3',
+  SPLASH: 'https://image2url.com/r2/default/audio/1771998715800-79455c88-33e7-4d96-a4ea-657c316e8854.mp3',
+  FLUSH: 'https://image2url.com/r2/default/audio/1771995663220-a770ed66-a2d2-4085-8dcc-fffe477e2c39.mp3',
   RAINBOW: 'https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3',
-  HOLY: 'https://assets.mixkit.co/active_storage/sfx/2014/2014-preview.mp3', // More intense heavenly shimmer
+  HOLY: 'https://image2url.com/r2/default/audio/1771997563766-fbda3064-caf8-45c0-aa65-4bad81edb495.mp3', // More intense heavenly shimmer
   CLICK: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', // Subtle click for the handle
 };

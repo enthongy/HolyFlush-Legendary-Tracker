@@ -24,6 +24,8 @@ export const Toilet: React.FC<ToiletProps> = ({
   
   const [isLongPressing, setIsLongPressing] = useState(false);
   const [wasHolyFlush, setWasHolyFlush] = useState(false);
+  const [isImpacted, setIsImpacted] = useState(false);
+  const [rippleKey, setRippleKey] = useState(0);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const hasTriggeredRef = useRef(false);
 
@@ -53,10 +55,13 @@ export const Toilet: React.FC<ToiletProps> = ({
   // Trigger splash when a new poo is selected
   useEffect(() => {
     if (selectedPoo && !isFlushing) {
-      // The drop animation takes about 350-400ms to "hit" the water
+      // The drop animation takes about 150-200ms to "hit" the water with current spring settings
       const timer = setTimeout(() => {
-        playSound(splashAudio, 0.7);
-      }, 380);
+        playSound(splashAudio, 0.8);
+        setIsImpacted(true);
+        setRippleKey(prev => prev + 1);
+        setTimeout(() => setIsImpacted(false), 150);
+      }, 0);
       
       if (selectedPoo.id === PooType.RAINBOW) {
         playSound(rainbowAudio, 0.8);
@@ -69,31 +74,50 @@ export const Toilet: React.FC<ToiletProps> = ({
   // Trigger flush sound and handle completion timing
   useEffect(() => {
     if (isFlushing) {
-      if (wasHolyFlush) {
-        playSound(holyAudio, 1.0); // Max volume for holy
-      }
-      // Small delay for the flush sound to match the handle movement
-      const soundTimer = setTimeout(() => playSound(flushAudio, 0.9), 100);
+      const mainAudio = wasHolyFlush ? holyAudio.current : flushAudio.current;
       
-      // Animation duration: 2s for standard, 5s for holy
-      const duration = wasHolyFlush ? 5000 : 2000;
-      
-      // We want the vortex to finish slightly before the state resets
-      // to allow a "settle" moment
-      const completeTimer = setTimeout(() => {
-        onFlushComplete();
-      }, duration);
+      if (mainAudio) {
+        const handleEnded = () => {
+          onFlushComplete();
+        };
+        mainAudio.addEventListener('ended', handleEnded);
+        
+        // Play sounds immediately
+        if (wasHolyFlush) {
+          playSound(holyAudio, 1.0);
+        }
+        playSound(flushAudio, 0.9);
 
-      return () => {
-        clearTimeout(soundTimer);
-        clearTimeout(completeTimer);
-      };
+        return () => {
+          mainAudio.removeEventListener('ended', handleEnded);
+          // Ensure sounds stop if component unmounts or state changes unexpectedly
+          if (flushAudio.current) {
+            flushAudio.current.pause();
+            flushAudio.current.currentTime = 0;
+          }
+          if (holyAudio.current) {
+            holyAudio.current.pause();
+            holyAudio.current.currentTime = 0;
+          }
+        };
+      } else {
+        // Fallback if audio not available
+        const duration = wasHolyFlush ? 12000 : 7000;
+        const completeTimer = setTimeout(onFlushComplete, duration);
+        return () => clearTimeout(completeTimer);
+      }
     }
   }, [isFlushing, wasHolyFlush, playSound, onFlushComplete]);
 
   const handleMouseDown = () => {
     if (isFlushing || !selectedPoo) return;
     playSound(clickAudio, 0.5);
+    
+    // Subtle haptic feedback on initial touch
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(10);
+    }
+    
     hasTriggeredRef.current = false;
     
     longPressTimer.current = setTimeout(() => {
@@ -101,6 +125,11 @@ export const Toilet: React.FC<ToiletProps> = ({
       setWasHolyFlush(true);
       onHandleClick(true);
       hasTriggeredRef.current = true;
+      
+      // Stronger haptic feedback when holy flush is triggered
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([30, 50, 30]);
+      }
     }, 1500);
   };
 
@@ -133,16 +162,21 @@ export const Toilet: React.FC<ToiletProps> = ({
       <motion.div
         className="relative w-full h-full preserve-3d"
         animate={{ 
-          rotateX: isFlushing ? [15, 25, 15] : 15,
+          rotateX: isFlushing ? [15, 25, 15] : (isImpacted ? 17 : 15),
           rotateY: (isLongPressing || (isFlushing && wasHolyFlush)) ? [ -12, 0, 12, -12] : -12,
-          scale: isFlushing ? (wasHolyFlush ? [1, 1.1, 1] : [1, 0.98, 1]) : 1,
+          scale: isFlushing ? (wasHolyFlush ? [1, 1.1, 1] : [1, 0.98, 1]) : (isImpacted ? 0.99 : 1),
           y: (isLongPressing || (isFlushing && wasHolyFlush)) ? [0, -15, 0] : 0
         }}
-        transition={{ 
+        transition={isFlushing ? { 
           duration: isLongPressing ? 0.2 : 0.6, 
-          repeat: isFlushing ? Infinity : 0,
+          repeat: Infinity,
           repeatType: "reverse",
           ease: "easeInOut"
+        } : {
+          type: "spring",
+          damping: 20,
+          stiffness: 80,
+          mass: 1
         }}
       >
         {/* Tank - 3D Box */}
@@ -223,6 +257,19 @@ export const Toilet: React.FC<ToiletProps> = ({
               }}
               transition={{ duration: 0.4 }}
             >
+              {/* Selection Ripple */}
+              <AnimatePresence>
+                {!isFlushing && (
+                  <motion.div
+                    key={rippleKey}
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 2, opacity: [0, 0.5, 0] }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="absolute w-32 h-32 border-2 border-white/40 rounded-full pointer-events-none"
+                  />
+                )}
+              </AnimatePresence>
+
               {/* Bubbles */}
               {!isFlushing && (
                 <div className="absolute inset-0 pointer-events-none opacity-40">
@@ -279,41 +326,106 @@ export const Toilet: React.FC<ToiletProps> = ({
                 )}
               </AnimatePresence>
 
-              {/* Vortex Animation */}
+              {/* Enhanced Vortex Animation */}
               <AnimatePresence>
                 {isFlushing && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0, rotate: 0 }}
-                    animate={{ 
-                      opacity: [0, 1, 1, 0], 
-                      scale: wasHolyFlush ? [0, 4, 4, 0] : [0, 2.5, 2.5, 0], 
-                      rotate: wasHolyFlush ? 4320 : 1440 
-                    }}
-                    exit={{ opacity: 0, scale: 0 }}
-                    className={`absolute w-40 h-40 border-[12px] rounded-full z-40 ${
-                      wasHolyFlush ? 'border-yellow-300/70 border-t-white shadow-[0_0_40px_rgba(234,179,8,0.5)]' : 'border-blue-200/50 border-t-blue-400/70'
-                    }`}
-                    transition={{ 
-                      duration: wasHolyFlush ? 5 : 2, 
-                      ease: "easeInOut",
-                      times: [0, 0.1, 0.9, 1]
-                    }}
-                  />
+                  <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
+                    {/* Main Vortex Rings */}
+                    {[...Array(3)].map((_, i) => (
+                      <motion.div
+                        key={`ring-${i}`}
+                        initial={{ opacity: 0, scale: 0, rotate: 0 }}
+                        animate={{ 
+                          opacity: 0.8, 
+                          scale: wasHolyFlush ? 3.5 + i * 0.5 : 2.2 + i * 0.3, 
+                          rotate: 360 * (i % 2 === 0 ? 1 : -1)
+                        }}
+                        exit={{ opacity: 0, scale: 0, transition: { duration: 0.8 } }}
+                        transition={{ 
+                          opacity: { duration: 0.5 },
+                          scale: { duration: 0.8, ease: "backOut" },
+                          rotate: { 
+                            duration: wasHolyFlush ? 1.5 : 2.5, 
+                            repeat: Infinity, 
+                            ease: "linear" 
+                          }
+                        }}
+                        className={`absolute w-40 h-40 border-[10px] rounded-full ${
+                          wasHolyFlush 
+                            ? 'border-yellow-300/60 border-t-white shadow-[0_0_40px_rgba(234,179,8,0.4)]' 
+                            : 'border-blue-200/40 border-t-blue-400/60'
+                        }`}
+                        style={{ borderStyle: i % 2 === 0 ? 'solid' : 'dashed' }}
+                      />
+                    ))}
+
+                    {/* Swirling Particles (Bubbles/Foam/Gold) */}
+                    {[...Array(wasHolyFlush ? 40 : 20)].map((_, i) => (
+                      <motion.div
+                        key={`particle-${i}`}
+                        initial={{ opacity: 0, scale: 0, rotate: Math.random() * 360 }}
+                        animate={{ 
+                          opacity: 1,
+                          scale: Math.random() * 1.2 + 0.5,
+                          rotate: (Math.random() > 0.5 ? 360 : -360) + (Math.random() * 360),
+                        }}
+                        exit={{ opacity: 0, scale: 0, transition: { duration: 0.5 } }}
+                        transition={{ 
+                          opacity: { duration: 0.3 },
+                          scale: { duration: 0.5 },
+                          rotate: { 
+                            duration: (wasHolyFlush ? 2 : 3) + Math.random() * 1, 
+                            repeat: Infinity, 
+                            ease: "linear" 
+                          },
+                          delay: Math.random() * 0.5
+                        }}
+                        className="absolute w-full h-full"
+                      >
+                        <div 
+                          className={`absolute rounded-full ${
+                            wasHolyFlush 
+                              ? 'bg-gradient-to-br from-yellow-200 to-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.8)]' 
+                              : 'bg-white/80 shadow-sm'
+                          }`}
+                          style={{
+                            width: wasHolyFlush ? Math.random() * 8 + 3 : Math.random() * 5 + 2,
+                            height: wasHolyFlush ? Math.random() * 8 + 3 : Math.random() * 5 + 2,
+                            left: `${50 + (Math.random() * 35 + 5)}%`,
+                            top: `${50 + (Math.random() * 10 - 5)}%`,
+                            filter: wasHolyFlush ? 'none' : 'blur(0.5px)'
+                          }}
+                        />
+                      </motion.div>
+                    ))}
+
+                    {/* Center Suction Effect */}
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.5, 1],
+                        opacity: [0.2, 0.5, 0.2]
+                      }}
+                      transition={{ duration: 0.5, repeat: Infinity }}
+                      className={`absolute w-12 h-12 rounded-full blur-xl ${
+                        wasHolyFlush ? 'bg-yellow-400' : 'bg-blue-400'
+                      }`}
+                    />
+                  </div>
                 )}
               </AnimatePresence>
 
               {/* The Poo */}
-              <AnimatePresence mode="wait">
+              <AnimatePresence>
                 {selectedPoo && (
                   <motion.div
                     key={selectedPoo.id}
                     initial={{ y: -400, opacity: 0, scale: 0.1, rotate: -60 }}
                     animate={isFlushing ? {
-                      rotate: wasHolyFlush ? 3600 : 1080,
+                      rotate: wasHolyFlush ? 8640 : 5040,
                       scale: 0,
                       opacity: 0,
                       y: 150,
-                      transition: { duration: 0.8, ease: "anticipate" }
+                      transition: { duration: wasHolyFlush ? 2.5 : 1.8, ease: "anticipate" }
                     } : {
                       y: 0,
                       opacity: 1,
@@ -321,9 +433,9 @@ export const Toilet: React.FC<ToiletProps> = ({
                       rotate: 0,
                       transition: { 
                         type: "spring", 
-                        damping: 10, 
-                        stiffness: 150,
-                        mass: 0.6
+                        damping: 15, 
+                        stiffness: 300,
+                        mass: 0.4
                       }
                     }}
                     className="text-8xl z-30 drop-shadow-[0_15px_15px_rgba(0,0,0,0.4)] relative"
@@ -337,7 +449,7 @@ export const Toilet: React.FC<ToiletProps> = ({
                         scale: [0, 2.5, 0], 
                         opacity: [0, 1, 0] 
                       } : {}}
-                      transition={{ delay: 0.4, duration: 0.6 }}
+                      transition={{ delay: 0.15, duration: 0.6 }}
                       className="absolute inset-0 bg-blue-300/50 rounded-full blur-2xl -z-10"
                     />
                   </motion.div>

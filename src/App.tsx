@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Calendar as CalendarIcon, Info, CheckCircle2 } from 'lucide-react';
 import { Toilet } from './components/Toilet';
@@ -19,6 +19,7 @@ export default function App() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const [isHolyFlush, setIsHolyFlush] = useState(false);
+  const successTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load history from localStorage on mount
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function App() {
           setIsHolyFlush(false);
           setSelectedPoo(null);
         }
-      }, 10000);
+      }, 15000);
       return () => clearTimeout(timer);
     }
   }, [isFlushing]);
@@ -72,13 +73,31 @@ export default function App() {
     setSelectedPoo(null);
     setShowSuccess(true);
     
-    setTimeout(() => setShowSuccess(false), 3000);
+    // Clear any existing timer
+    if (successTimerRef.current) clearTimeout(successTimerRef.current);
+    
+    // Success message stays for 5 seconds to give time for Undo
+    successTimerRef.current = setTimeout(() => setShowSuccess(false), 5000);
+  };
+
+  const undoLastFlush = () => {
+    if (history.length === 0) return;
+    setHistory(prev => prev.slice(0, -1));
+    setShowSuccess(false);
+    if (successTimerRef.current) clearTimeout(successTimerRef.current);
   };
 
   return (
     <motion.div 
-      animate={isFlushing ? { x: isHolyFlush ? [0, -6, 6, -6, 6, 0] : [0, -2, 2, -2, 2, 0] } : {}}
-      transition={{ duration: 0.1, repeat: isFlushing ? Infinity : 0 }}
+      animate={isFlushing ? { x: isHolyFlush ? [0, -6, 6, -6, 6, 0] : [0, -2, 2, -2, 2, 0] } : { x: 0 }}
+      transition={isFlushing ? { 
+        duration: 0.1, 
+        repeat: Infinity 
+      } : { 
+        type: "spring", 
+        damping: 10, 
+        stiffness: 100 
+      }}
       className="relative min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 overflow-hidden bg-gradient-to-b from-sky-50 to-white"
     >
       {/* Background Decor - Floating Bubbles */}
@@ -168,12 +187,38 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.5, y: 50 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.5, y: -50 }}
-              className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-3xl shadow-2xl flex items-center gap-3 sm:gap-4 font-black text-base sm:text-lg border-b-4 border-emerald-600"
+              className="flex flex-col items-center gap-3"
             >
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="bg-gradient-to-r from-emerald-400 to-teal-500 text-white px-6 py-3 sm:px-8 sm:py-4 rounded-3xl shadow-2xl flex items-center gap-3 sm:gap-4 font-black text-base sm:text-lg border-b-4 border-emerald-600">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white/20 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                </div>
+                LEGENDARY FLUSH!
               </div>
-              LEGENDARY FLUSH!
+              
+              <motion.button
+                onClick={undoLastFlush}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  scale: [1, 1.03, 1],
+                }}
+                transition={{
+                  scale: {
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  },
+                  opacity: { duration: 0.3 },
+                  y: { duration: 0.3 }
+                }}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-white/90 backdrop-blur-md text-slate-700 px-6 py-2.5 rounded-full text-sm font-black shadow-[0_10px_25px_rgba(0,0,0,0.1)] border border-white flex items-center gap-2 hover:bg-white transition-colors group"
+              >
+                <span className="text-blue-500 group-hover:rotate-[-45deg] transition-transform duration-300">↩</span> UNDO LAST LOG
+              </motion.button>
             </motion.div>
           )}
         </AnimatePresence>
