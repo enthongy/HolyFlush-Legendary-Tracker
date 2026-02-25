@@ -6,13 +6,14 @@ import { PooTypeConfig } from '../types';
 interface ClassificationBarProps {
   onSelect: (type: PooTypeConfig) => void;
   selectedId?: string;
+  pooTypes: PooTypeConfig[];
 }
 
-export const ClassificationBar: React.FC<ClassificationBarProps> = ({ onSelect, selectedId }) => {
+export const ClassificationBar: React.FC<ClassificationBarProps> = ({ onSelect, selectedId, pooTypes }) => {
   return (
     <div className="w-full">
       <div className="flex overflow-x-auto py-2 px-1 gap-4 no-scrollbar snap-x">
-        {POO_TYPES.map((type) => (
+        {pooTypes.map((type) => (
           <motion.button
             key={type.id}
             whileHover={{ scale: 1.05, y: -2 }}

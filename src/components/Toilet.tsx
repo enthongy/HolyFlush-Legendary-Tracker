@@ -294,7 +294,7 @@ export const Toilet: React.FC<ToiletProps> = ({
           <div className="absolute top-0 -left-1.5 w-3 h-full bg-slate-100 rounded-l-2xl transform rotateY-90 origin-right" />
           
           {/* Handle (Moved to Left) */}
-          <div className="absolute top-12 -left-10 w-12 h-12 preserve-3d z-30">
+          <div className="absolute top-6 -left-10 w-12 h-12 preserve-3d z-30">
             <motion.button
               onMouseDown={handleMouseDown}
               onMouseUp={handleMouseUp}

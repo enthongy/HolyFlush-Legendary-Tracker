@@ -10,28 +10,41 @@ import confetti from 'canvas-confetti';
 import { Toilet } from './components/Toilet';
 import { ClassificationBar } from './components/ClassificationBar';
 import { Calendar } from './components/Calendar';
+import { CustomizePoo } from './components/CustomizePoo';
 import { PooTypeConfig, PooLogEntry, FlushRank } from './types';
+import { POO_TYPES } from './constants';
 
 export default function App() {
   const [selectedPoo, setSelectedPoo] = useState<PooTypeConfig | null>(null);
   const [isFlushing, setIsFlushing] = useState(false);
   const [history, setHistory] = useState<PooLogEntry[]>([]);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastPoo, setLastPoo] = useState<PooTypeConfig | null>(null);
   const [lastRank, setLastRank] = useState<FlushRank>(FlushRank.NORMAL);
+  const [customEmojis, setCustomEmojis] = useState<Record<string, string>>({});
 
   const [isHolyFlush, setIsHolyFlush] = useState(false);
   const successTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load history from localStorage on mount
+  // Load history and custom emojis from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('poolog_history');
-    if (saved) {
+    const savedHistory = localStorage.getItem('poolog_history');
+    if (savedHistory) {
       try {
-        setHistory(JSON.parse(saved));
+        setHistory(JSON.parse(savedHistory));
       } catch (e) {
         console.error('Failed to parse history', e);
+      }
+    }
+
+    const savedEmojis = localStorage.getItem('poolog_custom_emojis');
+    if (savedEmojis) {
+      try {
+        setCustomEmojis(JSON.parse(savedEmojis));
+      } catch (e) {
+        console.error('Failed to parse custom emojis', e);
       }
     }
   }, []);
@@ -40,6 +53,16 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('poolog_history', JSON.stringify(history));
   }, [history]);
+
+  // Save custom emojis to localStorage
+  useEffect(() => {
+    localStorage.setItem('poolog_custom_emojis', JSON.stringify(customEmojis));
+  }, [customEmojis]);
+
+  const currentPooTypes = POO_TYPES.map(type => ({
+    ...type,
+    icon: customEmojis[type.id] || type.icon
+  }));
 
   const handleFlush = (rank: FlushRank) => {
     if (!selectedPoo || isFlushing) return;
@@ -189,13 +212,14 @@ export default function App() {
         <motion.div 
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          className="flex items-center gap-3 sm:gap-4"
+          onClick={() => setIsCustomizeOpen(true)}
+          className="flex items-center gap-3 sm:gap-4 cursor-pointer group"
         >
-          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl shadow-[0_8px_20px_rgba(0,0,0,0.06)] flex items-center justify-center text-2xl sm:text-3xl border border-slate-50">
+          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl shadow-[0_8px_20px_rgba(0,0,0,0.06)] flex items-center justify-center text-2xl sm:text-3xl border border-slate-50 group-hover:scale-110 transition-transform">
             <span className="filter drop-shadow-sm">🚽</span>
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight leading-none">HolyFlush</h1>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight leading-none group-hover:text-blue-500 transition-colors">HolyFlush</h1>
             <p className="text-[9px] sm:text-[10px] font-black text-blue-500 uppercase tracking-widest mt-1 sm:mt-1.5 opacity-80">Legendary Tracker</p>
           </div>
         </motion.div>
@@ -242,7 +266,7 @@ export default function App() {
       </main>
 
       {/* Footer: Classification Bar & Flush Action */}
-      <footer className="w-full max-w-md flex flex-col items-center gap-4 sm:gap-6 z-10 pb-4 sm:pb-6">
+      <footer className="w-full max-w-md flex flex-col items-center gap-6 sm:gap-8 z-10 pb-24 sm:pb-28 px-4">
         {/* Success Overlay */}
         <AnimatePresence>
           {showSuccess && (
@@ -333,7 +357,8 @@ export default function App() {
           <div className="bg-white/30 backdrop-blur-md p-2 sm:p-3 rounded-[2.5rem] sm:rounded-[3rem] shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-white/60">
             <ClassificationBar 
               onSelect={setSelectedPoo} 
-              selectedId={selectedPoo?.id} 
+              selectedId={selectedPoo?.id}
+              pooTypes={currentPooTypes}
             />
           </div>
           
@@ -342,9 +367,9 @@ export default function App() {
             onClick={() => handleFlush(FlushRank.NORMAL)}
             whileHover={selectedPoo && !isFlushing ? { scale: 1.02, y: -2 } : {}}
             whileTap={selectedPoo && !isFlushing ? { scale: 0.95 } : {}}
-            className={`w-full py-5 sm:py-6 rounded-full font-black text-xl sm:text-2xl shadow-2xl transition-all flex items-center justify-center gap-4 ${
+            className={`w-full py-6 sm:py-8 rounded-[2rem] sm:rounded-[2.5rem] font-black text-2xl sm:text-3xl shadow-2xl transition-all flex items-center justify-center gap-4 ${
               selectedPoo && !isFlushing
-                ? 'bg-gradient-to-r from-[#FF7E5F] to-[#FEB47B] text-white shadow-[0_10px_25px_rgba(255,126,95,0.4)]'
+                ? 'bg-gradient-to-r from-[#FF7E5F] to-[#FEB47B] text-white shadow-[0_15px_35px_rgba(255,126,95,0.5)]'
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed'
             }`}
           >
@@ -372,6 +397,24 @@ export default function App() {
         onClose={() => setIsCalendarOpen(false)} 
         history={history}
       />
+
+      {/* Customize Overlay */}
+      <AnimatePresence>
+        {isCustomizeOpen && (
+          <CustomizePoo 
+            onBack={() => setIsCustomizeOpen(false)}
+            customEmojis={customEmojis}
+            onSave={(newEmojis) => {
+              setCustomEmojis(newEmojis);
+              // If currently selected poo emoji changed, update it
+              if (selectedPoo) {
+                const updated = currentPooTypes.find(t => t.id === selectedPoo.id);
+                if (updated) setSelectedPoo(updated);
+              }
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Background Decor */}
       <div className="fixed top-20 -left-20 w-64 h-64 bg-blue-400/5 rounded-full blur-3xl pointer-events-none" />
