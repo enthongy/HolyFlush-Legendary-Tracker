@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Edit2, Trash2, Check, RotateCcw } from 'lucide-react';
 import { PooLogEntry } from '../types';
 import { POO_TYPES } from '../constants';
 
@@ -8,11 +8,16 @@ interface CalendarProps {
   isOpen: boolean;
   onClose: () => void;
   history: PooLogEntry[];
+  onUpdate: (id: string, updates: Partial<PooLogEntry>) => void;
+  onDelete: (id: string) => void;
 }
 
-export const Calendar: React.FC<CalendarProps> = ({ isOpen, onClose, history }) => {
+export const Calendar: React.FC<CalendarProps> = ({ isOpen, onClose, history, onUpdate, onDelete }) => {
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const [selectedDate, setSelectedDate] = React.useState<Date | null>(new Date());
+  const [editingEntryId, setEditingEntryId] = React.useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = React.useState<string | null>(null);
+  const [editNote, setEditNote] = React.useState('');
   const activityListRef = React.useRef<HTMLDivElement>(null);
 
   // Scroll to activity list when a date is selected
@@ -222,35 +227,132 @@ export const Calendar: React.FC<CalendarProps> = ({ isOpen, onClose, history }) 
                   ) : (
                     displayedLogs.map(entry => {
                       const type = POO_TYPES.find(t => t.id === entry.type);
+                      const isEditing = editingEntryId === entry.id;
+                      const isConfirmingDelete = confirmDeleteId === entry.id;
+
                       return (
                         <motion.div 
                           key={entry.id} 
+                          layout
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
-                          className="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-100"
+                          onClick={() => {
+                            if (!isEditing && !isConfirmingDelete) {
+                              setEditingEntryId(entry.id);
+                              setEditNote(entry.notes || '');
+                            }
+                          }}
+                          className={`flex flex-col bg-white p-4 rounded-2xl shadow-sm border transition-all cursor-pointer ${
+                            isEditing || isConfirmingDelete ? 'border-blue-200 ring-2 ring-blue-50' : 'border-slate-100 hover:border-blue-100'
+                          } gap-3`}
                         >
-                          <div className="flex items-center gap-4">
-                            <span className="text-3xl filter drop-shadow-sm">{type?.icon}</span>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <div className="text-sm font-black text-slate-700">{type?.label}</div>
-                                {entry.rank && entry.rank !== 'NORMAL' && (
-                                  <span className="text-[8px] font-black bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded-full border border-blue-100 uppercase tracking-tighter">
-                                    {entry.rank}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                {!selectedDate && ` • ${new Date(entry.timestamp).toLocaleDateString()}`}
-                              </div>
-                              {entry.notes && (
-                                <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded-xl border border-slate-100 italic">
-                                  "{entry.notes}"
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <span className="text-3xl filter drop-shadow-sm">{type?.icon}</span>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <div className="text-sm font-black text-slate-700">{type?.label}</div>
+                                  {entry.rank && entry.rank !== 'NORMAL' && (
+                                    <span className="text-[8px] font-black bg-blue-50 text-blue-500 px-1.5 py-0.5 rounded-full border border-blue-100 uppercase tracking-tighter">
+                                      {entry.rank}
+                                    </span>
+                                  )}
                                 </div>
-                              )}
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                  {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                  {!selectedDate && ` • ${new Date(entry.timestamp).toLocaleDateString()}`}
+                                </div>
+                              </div>
                             </div>
+
+                            {(isEditing || isConfirmingDelete) && (
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingEntryId(null);
+                                  setConfirmDeleteId(null);
+                                }}
+                                className="p-2 hover:bg-slate-50 rounded-xl text-slate-400 transition-colors"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            )}
                           </div>
+
+                          {isEditing && !isConfirmingDelete && (
+                            <motion.div 
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              className="space-y-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Edit Notes</div>
+                              <textarea 
+                                value={editNote}
+                                onChange={(e) => setEditNote(e.target.value)}
+                                placeholder="Add some details..."
+                                autoFocus
+                                className="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400/30 min-h-[80px] resize-none"
+                              />
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={() => {
+                                    onUpdate(entry.id, { notes: editNote.trim() || undefined });
+                                    setEditingEntryId(null);
+                                  }}
+                                  className="flex-1 py-3 bg-slate-900 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-slate-200"
+                                >
+                                  Save Changes
+                                </button>
+                                <button 
+                                  onClick={() => {
+                                    setConfirmDeleteId(entry.id);
+                                  }}
+                                  className="px-4 py-3 bg-red-50 text-red-500 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-100 transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </motion.div>
+                          )}
+
+                          {isConfirmingDelete && (
+                            <motion.div 
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="bg-red-50 p-4 rounded-xl border border-red-100 space-y-3"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="text-center">
+                                <div className="text-xs font-black text-red-600 uppercase tracking-widest mb-1">Confirm Delete?</div>
+                                <p className="text-[10px] text-red-400 font-bold">This action cannot be undone.</p>
+                              </div>
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={() => {
+                                    onDelete(entry.id);
+                                    setConfirmDeleteId(null);
+                                    setEditingEntryId(null);
+                                  }}
+                                  className="flex-1 py-2.5 bg-red-500 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-md shadow-red-200"
+                                >
+                                  Yes, Delete
+                                </button>
+                                <button 
+                                  onClick={() => setConfirmDeleteId(null)}
+                                  className="flex-1 py-2.5 bg-white text-slate-500 border border-red-100 rounded-lg text-[10px] font-black uppercase tracking-widest"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </motion.div>
+                          )}
+
+                          {!isEditing && !isConfirmingDelete && entry.notes && (
+                            <div className="text-xs text-slate-600 bg-slate-50 p-2 rounded-xl border border-slate-100 italic">
+                              "{entry.notes}"
+                            </div>
+                          )}
                         </motion.div>
                       );
                     })

@@ -171,6 +171,16 @@ export default function App() {
     if (successTimerRef.current) clearTimeout(successTimerRef.current);
   };
 
+  const updateLogEntry = (id: string, updates: Partial<PooLogEntry>) => {
+    setHistory(prev => prev.map(entry => 
+      entry.id === id ? { ...entry, ...updates } : entry
+    ));
+  };
+
+  const deleteLogEntry = (id: string) => {
+    setHistory(prev => prev.filter(entry => entry.id !== id));
+  };
+
   const handleShare = async () => {
     if (!lastPoo) return;
     
@@ -459,6 +469,8 @@ export default function App() {
         isOpen={isCalendarOpen} 
         onClose={() => setIsCalendarOpen(false)} 
         history={history}
+        onUpdate={updateLogEntry}
+        onDelete={deleteLogEntry}
       />
 
       {/* Customize Overlay */}
