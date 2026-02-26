@@ -15,6 +15,10 @@
 - **Privacy First**: All data is stored locally in your browser. Your business stays your business.
 - **Responsive Design**: Optimized for mobile-first usage, because that's where the tracking happens.
 
+## 📱 Android App
+
+For Android users, you can download the latest APK directly from the **[GitHub Releases](https://github.com/enthongy/HolyFlush-Legendary-Tracker/blob/main/HolyFlush.apk)** page. Enjoy the legendary tracking experience natively on your device!
+
 ## 🛠️ Tech Stack
 
 - **Framework**: [React 18+](https://reactjs.org/)
