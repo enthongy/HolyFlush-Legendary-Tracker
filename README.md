@@ -2,7 +2,7 @@
 
 **HolyFlush** is a high-performance, beautifully crafted bowel movement tracker designed for those who take their health (and their bathroom breaks) seriously. Built with a focus on "crafted" UI/UX, it combines precision health tracking with a playful, legendary aesthetic.
 
-![HolyFlush Header](https://picsum.photos/seed/holyflush/1200/400?blur=2)
+![HolyFlush Header](https://github.com/enthongy/HolyFlush-Legendary-Poop-tracker/blob/main/public/favicon.svg)
 
 ## ✨ Features
 
