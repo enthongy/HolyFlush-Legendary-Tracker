@@ -5,7 +5,7 @@ export const POO_TYPES: PooTypeConfig[] = [
     id: PooType.IDEAL,
     label: 'Ideal',
     subLabel: 'Type 1',
-    icon: '🐍',
+    icon: '💩',
     color: 'bg-emerald-600',
     description: 'The gold standard',
   },
@@ -55,7 +55,8 @@ export const SOUNDS = {
   SPLASH: 'https://image2url.com/r2/default/audio/1771998715800-79455c88-33e7-4d96-a4ea-657c316e8854.mp3',
   FLUSH: 'https://image2url.com/r2/default/audio/1771995663220-a770ed66-a2d2-4085-8dcc-fffe477e2c39.mp3',
   RAINBOW: 'https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3',
-  HOLY: 'https://image2url.com/r2/default/audio/1771997563766-fbda3064-caf8-45c0-aa65-4bad81edb495.mp3', // More intense heavenly shimmer
-  CLICK: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', // Subtle click for the handle
-  RANK_UP: 'https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3', // Chime for rank progression
+  HOLY: 'https://image2url.com/r2/default/audio/1771997563766-fbda3064-caf8-45c0-aa65-4bad81edb495.mp3',
+  CLICK: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
+  RANK_UP: 'https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3',
+  SUCCESS: 'https://image2url.com/r2/default/audio/1772083373691-b4af4473-60e9-48ed-b827-5fbff4f3726e.mp3', // New success sound for confetti
 };

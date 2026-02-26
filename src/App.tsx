@@ -12,7 +12,7 @@ import { ClassificationBar } from './components/ClassificationBar';
 import { Calendar } from './components/Calendar';
 import { CustomizePoo } from './components/CustomizePoo';
 import { PooTypeConfig, PooLogEntry, FlushRank } from './types';
-import { POO_TYPES } from './constants';
+import { POO_TYPES, SOUNDS } from './constants';
 
 export default function App() {
   const [selectedPoo, setSelectedPoo] = useState<PooTypeConfig | null>(null);
@@ -27,6 +27,20 @@ export default function App() {
 
   const [isHolyFlush, setIsHolyFlush] = useState(false);
   const successTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Initialize audio element
+  useEffect(() => {
+    audioRef.current = new Audio();
+    audioRef.current.volume = 0.5; // Set volume to 50%
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   // Load history and custom emojis from localStorage on mount
   useEffect(() => {
@@ -85,6 +99,19 @@ export default function App() {
     }
   }, [isFlushing]);
 
+  const playSuccessSound = () => {
+    if (audioRef.current) {
+      audioRef.current.src = SOUNDS.SUCCESS;
+      audioRef.current.play().catch(error => {
+        console.log('Audio playback failed:', error);
+        // Fallback for browsers that block autoplay
+        if (error.name === 'NotAllowedError') {
+          console.log('Browser blocked autoplay - waiting for user interaction');
+        }
+      });
+    }
+  };
+
   const onFlushComplete = () => {
     if (!selectedPoo) return;
 
@@ -101,6 +128,9 @@ export default function App() {
     setIsHolyFlush(false);
     setSelectedPoo(null);
     setShowSuccess(true);
+    
+    // Play success sound when confetti starts
+    playSuccessSound();
     
     // Trigger confetti
     const duration = 3 * 1000;
