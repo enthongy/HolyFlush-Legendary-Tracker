@@ -156,7 +156,7 @@ export const CustomizePoo: React.FC<CustomizePooProps> = ({ onBack, customEmojis
         <section className="flex-1">
           <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Choose New Emoji</h3>
           <div className="grid grid-cols-5 sm:grid-cols-8 gap-3">
-            {EMOJI_OPTIONS.map((emoji) => (
+            {Array.from(new Set(EMOJI_OPTIONS)).map((emoji) => (
               <button
                 key={emoji}
                 onClick={() => handleEmojiSelect(emoji)}

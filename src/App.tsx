@@ -23,7 +23,9 @@ export default function App() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastPoo, setLastPoo] = useState<PooTypeConfig | null>(null);
   const [lastRank, setLastRank] = useState<FlushRank>(FlushRank.NORMAL);
+  const [lastNote, setLastNote] = useState<string | undefined>(undefined);
   const [customEmojis, setCustomEmojis] = useState<Record<string, string>>({});
+  const [currentNote, setCurrentNote] = useState('');
 
   const [isHolyFlush, setIsHolyFlush] = useState(false);
   const successTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -116,17 +118,21 @@ export default function App() {
     if (!selectedPoo) return;
 
     setLastPoo(selectedPoo);
+    const noteToSave = currentNote.trim() || undefined;
+    setLastNote(noteToSave);
     const newEntry: PooLogEntry = {
       id: crypto.randomUUID(),
       timestamp: Date.now(),
       type: selectedPoo.id,
       rank: lastRank,
+      notes: noteToSave,
     };
 
     setHistory(prev => [...prev, newEntry]);
     setIsFlushing(false);
     setIsHolyFlush(false);
     setSelectedPoo(null);
+    setCurrentNote('');
     setShowSuccess(true);
     
     // Play success sound when confetti starts
@@ -242,11 +248,16 @@ export default function App() {
         <motion.div 
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
-          onClick={() => setIsCustomizeOpen(true)}
-          className="flex items-center gap-3 sm:gap-4 cursor-pointer group"
+          onClick={() => !isFlushing && setIsCustomizeOpen(true)}
+          className={`flex items-center gap-3 sm:gap-4 cursor-pointer group ${isFlushing ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl shadow-[0_8px_20px_rgba(0,0,0,0.06)] flex items-center justify-center text-2xl sm:text-3xl border border-slate-50 group-hover:scale-110 transition-transform">
-            <span className="filter drop-shadow-sm">🚽</span>
+          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl shadow-[0_8px_20px_rgba(0,0,0,0.06)] flex items-center justify-center overflow-hidden border border-slate-50 group-hover:scale-110 transition-transform">
+            <img 
+              src="/icon/ic_launcher.png" 
+              alt="HolyFlush Icon" 
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight leading-none group-hover:text-blue-500 transition-colors">HolyFlush</h1>
@@ -259,8 +270,9 @@ export default function App() {
           animate={{ x: 0, opacity: 1 }}
         >
           <button 
-            onClick={() => setIsCalendarOpen(true)}
-            className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl shadow-[0_8px_20px_rgba(0,0,0,0.06)] flex items-center justify-center hover:bg-slate-50 transition-all hover:scale-110 active:scale-95 border border-slate-50"
+            onClick={() => !isFlushing && setIsCalendarOpen(true)}
+            disabled={isFlushing}
+            className={`w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl shadow-[0_8px_20px_rgba(0,0,0,0.06)] flex items-center justify-center hover:bg-slate-50 transition-all hover:scale-110 active:scale-95 border border-slate-50 ${isFlushing ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <CalendarIcon className="w-6 h-6 sm:w-7 sm:h-7 text-slate-700" />
           </button>
@@ -332,6 +344,11 @@ export default function App() {
                     <p className="text-slate-500 font-medium text-sm">
                       Your log has been safely archived in the annals of history.
                     </p>
+                    {lastNote && (
+                      <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-3 rounded-2xl border border-slate-100 italic">
+                        "{lastNote}"
+                      </div>
+                    )}
                   </div>
 
                   {/* Stats / Info */}
@@ -389,8 +406,24 @@ export default function App() {
               onSelect={setSelectedPoo} 
               selectedId={selectedPoo?.id}
               pooTypes={currentPooTypes}
+              isFlushing={isFlushing}
             />
           </div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full"
+          >
+            <input
+              type="text"
+              placeholder="Add a note (e.g., 'Feeling bloated', 'Spicy food yesterday')"
+              value={currentNote}
+              onChange={(e) => setCurrentNote(e.target.value)}
+              disabled={isFlushing}
+              className="w-full px-6 py-4 rounded-2xl bg-white/50 border border-white/60 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all text-sm"
+            />
+          </motion.div>
           
           <motion.button
             disabled={!selectedPoo || isFlushing}

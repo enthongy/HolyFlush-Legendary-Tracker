@@ -244,6 +244,11 @@ export const Calendar: React.FC<CalendarProps> = ({ isOpen, onClose, history }) 
                                 {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 {!selectedDate && ` • ${new Date(entry.timestamp).toLocaleDateString()}`}
                               </div>
+                              {entry.notes && (
+                                <div className="mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded-xl border border-slate-100 italic">
+                                  "{entry.notes}"
+                                </div>
+                              )}
                             </div>
                           </div>
                         </motion.div>

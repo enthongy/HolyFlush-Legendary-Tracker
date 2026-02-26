@@ -20,6 +20,7 @@ export interface PooLogEntry {
   timestamp: number;
   type: PooType;
   rank?: FlushRank;
+  notes?: string;
 }
 
 export interface PooTypeConfig {
