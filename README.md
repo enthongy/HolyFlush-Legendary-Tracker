@@ -17,7 +17,7 @@
 
 ## 📱 Android App
 
-For Android users, you can download the latest APK directly from the **[GitHub Releases](https://github.com/enthongy/HolyFlush-Legendary-Tracker/blob/main/HolyFlush.apk)** page. Enjoy the legendary tracking experience natively on your device!
+For Android users, you can download the latest APK directly from the **[GitHub Releases](https://github.com/enthongy/HolyFlush-Legendary-Poop-tracker/releases)** page. Enjoy the legendary tracking experience natively on your device!
 
 ## 🛠️ Tech Stack
 
