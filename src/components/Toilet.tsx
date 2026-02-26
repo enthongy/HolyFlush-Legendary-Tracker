@@ -302,13 +302,34 @@ export const Toilet: React.FC<ToiletProps> = ({
               onTouchEnd={handleMouseUp}
               disabled={isFlushing || !selectedPoo}
               whileTap={{ rotate: 45, scale: 0.9 }}
+              animate={selectedPoo && !isFlushing ? {
+                scale: [1, 1.2, 1], // bigger → smaller → bigger
+                rotate: [0, 5, -5, 0], // slight wiggle for extra attention
+              } : {}}
+              transition={selectedPoo && !isFlushing ? {
+                scale: {
+                  duration: 1.2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  times: [0, 0.5, 1]
+                },
+                rotate: {
+                  duration: 0.8,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.1
+                }
+              } : {}}
               className={`w-full h-full rounded-full border-4 shadow-lg cursor-pointer transition-all duration-300 flex items-center justify-center ${
                 (isLongPressing || (isFlushing && isEnhanced)) 
                   ? rankStyles.handle
-                  : 'bg-gradient-to-br from-slate-200 to-slate-300 border-slate-400'
+                  : selectedPoo && !isFlushing
+                    ? 'bg-gradient-to-br from-amber-200 to-amber-400 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]' // Highlighted when poo present
+                    : 'bg-gradient-to-br from-slate-200 to-slate-300 border-slate-400'
               } ${isFlushing || !selectedPoo ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <div className="w-5 h-5 bg-slate-500 rounded-full border border-slate-300 shadow-inner" />
+              
               
               {/* Rank Indicator */}
               <AnimatePresence>
@@ -365,7 +386,9 @@ export const Toilet: React.FC<ToiletProps> = ({
                   ? rankStyles.basin 
                   : isFlushing 
                     ? 'rgba(186, 230, 253, 0.9)' 
-                    : 'rgba(186, 242, 255, 0.7)'
+                    : selectedPoo
+                      ? 'rgba(255, 223, 186, 0.7)' // Slight warm tint when poo present
+                      : 'rgba(186, 242, 255, 0.7)'
               }}
               transition={{ duration: 0.4 }}
             >
