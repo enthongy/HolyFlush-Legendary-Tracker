@@ -254,7 +254,7 @@ export default function App() {
       </div>
 
       {/* Header */}
-      <header className="w-full max-w-md flex items-center justify-between z-10 px-1">
+      <header className="w-full max-w-md flex items-center justify-between z-10 px-1 mt-8 sm:mt-12">
         <motion.div 
           initial={{ x: -20, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
