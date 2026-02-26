@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar as CalendarIcon, Info, CheckCircle2, Share2, Trophy } from 'lucide-react';
+import { Calendar as CalendarIcon, Info, CheckCircle2, Share2, Trophy, Droplets } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { Toilet } from './components/Toilet';
 import { ClassificationBar } from './components/ClassificationBar';
@@ -263,7 +263,7 @@ export default function App() {
         >
           <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl shadow-[0_8px_20px_rgba(0,0,0,0.06)] flex items-center justify-center overflow-hidden border border-slate-50 group-hover:scale-110 transition-transform">
             <img 
-              src="/icon/ic_launcher.png" 
+              src="/favicon.svg" 
               alt="HolyFlush Icon" 
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
