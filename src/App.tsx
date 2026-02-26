@@ -266,7 +266,7 @@ export default function App() {
       </main>
 
       {/* Footer: Classification Bar & Flush Action */}
-      <footer className="w-full max-w-md flex flex-col items-center gap-4 sm:gap-6 z-10 pb-4 sm:pb-6 px-4">
+      <footer className="w-full max-w-md flex flex-col items-center gap-5 sm:gap-7 z-10 pb-12 sm:pb-16 px-4">
         {/* Success Overlay */}
         <AnimatePresence>
           {showSuccess && (
