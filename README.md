@@ -1,20 +1,75 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🚽 HolyFlush: Legendary Tracker
 
-# Run and deploy your AI Studio app
+**HolyFlush** is a high-performance, beautifully crafted bowel movement tracker designed for those who take their health (and their bathroom breaks) seriously. Built with a focus on "crafted" UI/UX, it combines precision health tracking with a playful, legendary aesthetic.
 
-This contains everything you need to run your app locally.
+![HolyFlush Header](https://picsum.photos/seed/holyflush/1200/400?blur=2)
 
-View your app in AI Studio: https://ai.studio/apps/06b2cf68-de30-4bae-8821-541a352ec6d5
+## ✨ Features
 
-## Run Locally
+- **Legendary Interaction**: Experience the most satisfying "Flush" animation in the industry, powered by Framer Motion.
+- **Bristol Stool Scale Integration**: Track your health using scientifically-backed classifications, from "The Rabbit" to "The Waterfall."
+- **Customizable Emojis**: Don't like the defaults? Personalize your tracking experience with custom emojis for every stool type.
+- **Interactive History & Calendar**: A beautiful, grid-based history view with inline editing and deletion.
+- **Privacy First**: All data is stored locally in your browser. Your business stays your business.
+- **Responsive Design**: Optimized for mobile-first usage, because that's where the tracking happens.
 
-**Prerequisites:**  Node.js
+## 🛠️ Tech Stack
 
+- **Framework**: [React 18+](https://reactjs.org/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Animations**: [Framer Motion (motion/react)](https://www.framer.com/motion/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Type Safety**: [TypeScript](https://www.typescriptlang.org/)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (Latest LTS recommended)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/holyflush.git
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Build for production:
+   ```bash
+   npm run build
+   ```
+
+## 🎨 Customization
+
+HolyFlush is designed to be yours. You can modify the `POO_TYPES` in `src/constants.ts` to add new classifications or change the existing ones.
+
+```typescript
+// Example: Adding a new type in src/constants.ts
+{
+  id: 'GHOST',
+  label: 'The Ghost',
+  icon: '👻',
+  description: 'The one that disappeared before you could see it.',
+  color: 'bg-slate-100'
+}
+```
+
+## 📜 License
+
+This project is licensed under the Apache-2.0 License.
+
+---
+
+*Crafted with ❤️ and a sense of humor.*
