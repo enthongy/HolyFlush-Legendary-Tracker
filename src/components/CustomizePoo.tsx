@@ -113,17 +113,17 @@ export const CustomizePoo: React.FC<CustomizePooProps> = ({ onBack, customEmojis
       exit={{ opacity: 0, x: -100 }}
       className="fixed inset-0 z-[200] bg-slate-50 flex flex-col"
     >
-      {/* Header */}
-      <header className="w-full bg-white border-bottom border-slate-100 p-4 sm:p-6 flex items-center justify-between shadow-sm">
-        <button 
-          onClick={onBack}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 transition-colors"
-        >
-          <ArrowLeft className="w-6 h-6 text-slate-600" />
-        </button>
-        <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Customize Specimen</h2>
-        <div className="w-10" /> {/* Spacer */}
-      </header>
+{/* Header */}
+<header className="w-full bg-white p-6 sm:p-8 flex items-center justify-between mt-8 sm:mt-12">
+  <button 
+    onClick={onBack}
+    className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-50 transition-colors"
+  >
+    <ArrowLeft className="w-6 h-6 text-slate-600" />
+  </button>
+  <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Customize Specimen</h2>
+  <div className="w-10" /> {/* Spacer */}
+</header>
 
       <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-8">
         {/* Type Selection */}
