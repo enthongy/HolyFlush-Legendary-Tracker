@@ -1,68 +1,88 @@
-# 🚽 HolyFlush: Legendary Tracker
+🚽 HolyFlush: Legendary Tracker
 
-**HolyFlush** is a high-performance, beautifully crafted bowel movement tracker designed for those who take their health (and their bathroom breaks) seriously. Built with a focus on "crafted" UI/UX, it combines precision health tracking with a playful, legendary aesthetic.
+HolyFlush is a high-performance, beautifully crafted bowel movement tracker designed for those who take their health (and their bathroom breaks) seriously. Built with a focus on premium UI/UX, it combines precision health tracking with a playful, legendary aesthetic.
 
-<p align="center">
-  <img src="https://github.com/enthongy/HolyFlush-Legendary-Tracker/blob/main/ic_launcher%20(3).png" width="200" />
-</p>
+<p align="center"> <img src="https://github.com/enthongy/HolyFlush-Legendary-Tracker/blob/main/ic_launcher%20(3).png" width="200" /> </p>
+🌍 Live Web Version (iOS Friendly)
 
-## ✨ Features
+🍎 iPhone / iPad users cannot install APK files.
+No worries — HolyFlush is fully available online:
 
-- **Legendary Interaction**: Experience the most satisfying "Flush" animation in the industry, powered by Framer Motion.
-- **Bristol Stool Scale Integration**: Track your health using scientifically-backed classifications, from "The Rabbit" to "The Waterfall."
-- **Customizable Emojis**: Don't like the defaults? Personalize your tracking experience with custom emojis for every stool type.
-- **Interactive History & Calendar**: A beautiful, grid-based history view with inline editing and deletion.
-- **Privacy First**: All data is stored locally in your browser. Your business stays your business.
-- **Responsive Design**: Optimized for mobile-first usage, because that's where the tracking happens.
+👉 Use HolyFlush instantly here:
+🔗 https://holy-flush-legendary-poop-tracker.vercel.app/
 
-## 📱 Android App
+The web version works beautifully on:
 
-For Android users, you can download the latest APK directly from the **[GitHub Releases](https://github.com/enthongy/HolyFlush-Legendary-Tracker/blob/main/HolyFlush.apk)** page. Enjoy the legendary tracking experience natively on your device!
+iPhone (Safari)
 
-## 🛠️ Tech Stack
+iPad
 
-- **Framework**: [React 18+](https://reactjs.org/)
-- **Build Tool**: [Vite](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Animations**: [Framer Motion (motion/react)](https://www.framer.com/motion/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Type Safety**: [TypeScript](https://www.typescriptlang.org/)
+Android
 
-## 🚀 Getting Started
+Desktop
 
-### Prerequisites
+You can even “Add to Home Screen” on iOS for an app-like experience.
 
-- Node.js (Latest LTS recommended)
-- npm or yarn
+📱 Android App (APK Download)
 
-### Installation
+For Android users, you can download the latest APK directly from:
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/holyflush.git
-   ```
+👉 Download HolyFlush APK
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+After downloading:
 
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
+Enable “Install from unknown sources”
 
-4. Build for production:
-   ```bash
-   npm run build
-   ```
+Install the APK
 
-## 🎨 Customization
+Begin your legendary tracking journey 🚽✨
 
-HolyFlush is designed to be yours. You can modify the `POO_TYPES` in `src/constants.ts` to add new classifications or change the existing ones.
+✨ Features
 
-```typescript
-// Example: Adding a new type in src/constants.ts
+Legendary Interaction – The most satisfying flush animation in the industry.
+
+Bristol Stool Scale Integration – Scientifically-backed tracking classifications.
+
+Customizable Emojis – Personalize every stool type.
+
+Interactive History & Calendar – Grid-based history with edit & delete.
+
+Privacy First – All data stored locally in your browser.
+
+Responsive Design – Optimized for mobile-first usage.
+
+🛠️ Tech Stack
+
+Framework: React 18+
+
+Build Tool: Vite
+
+Styling: Tailwind CSS
+
+Animations: Framer Motion
+
+Icons: Lucide React
+
+Language: TypeScript
+
+🚀 Getting Started (Developers)
+Prerequisites
+
+Node.js (Latest LTS recommended)
+
+npm or yarn
+
+Installation
+git clone https://github.com/your-username/holyflush.git
+cd holyflush
+npm install
+npm run dev
+Build for Production
+npm run build
+🎨 Customization
+
+Modify POO_TYPES inside src/constants.ts to add or edit classifications:
+
 {
   id: 'GHOST',
   label: 'The Ghost',
@@ -70,12 +90,8 @@ HolyFlush is designed to be yours. You can modify the `POO_TYPES` in `src/consta
   description: 'The one that disappeared before you could see it.',
   color: 'bg-slate-100'
 }
-```
+📜 License
 
-## 📜 License
+Licensed under the Apache-2.0 License.
 
-This project is licensed under the Apache-2.0 License.
-
----
-
-*Crafted with ❤️ and a sense of humor.*
+Crafted with ❤️, motion effects, and legendary flush energy. 🚽✨
