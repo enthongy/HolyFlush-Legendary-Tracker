@@ -20,7 +20,7 @@
 iOS devices cannot install APK files.  
 If you're using an iPhone or iPad, use the live web version instead:
 
-👉 https://holy-flush-legendary-poop-tracker.vercel.app/
+👉 https://holy-flush-legendary-tracker.vercel.app/
 
 You can also add it to your Home Screen for an app-like experience.
 
